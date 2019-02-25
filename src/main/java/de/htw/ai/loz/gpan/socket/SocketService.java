@@ -1,3 +1,18 @@
+/*
+Copyright 2019 Miles Lorenz
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+*/
 package de.htw.ai.loz.gpan.socket;
 
 import de.htw.ai.loz.gpan.mac.broker.EventBroker;
@@ -48,19 +63,15 @@ public class SocketService extends WebSocketServer implements EventBroker {
         System.out.println("WS OPEN: " + webSocket.getResourceDescriptor() + " " + brokerMap.size());
         ConfirmationResult result = ConfirmationResult.DENIED;
         for (Map.Entry<String, EventPublisher> entry : brokerMap.entrySet()) {
-            System.out.println(entry.getKey());
             if (webSocket.getResourceDescriptor().startsWith(entry.getKey())) {
                 String eventId = webSocket.getResourceDescriptor().replace(entry.getKey(), "");
                 EventSubscriber subscriber = new SocketAsSubscriber(webSocket);
-                System.out.println("subscribe rein");
                 result = entry.getValue().subscribeAnEvent(eventId, subscriber);
-                System.out.println("subscribe raus");
                 break;
             }
         }
 
         webSocket.send(result.name());
-        System.out.println(" => " + result.name());
         if (result != ConfirmationResult.SUCCESS)
             webSocket.close();
     }

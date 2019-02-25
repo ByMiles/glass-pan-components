@@ -1,0 +1,15 @@
+de.htw.ai.loz.gpan.app
+de.htw.ai.loz.gpan.conf
+de.htw.ai.loz.gpan.lpan.header
+de.htw.ai.loz.gpan.lpan.imp.store
+de.htw.ai.loz.gpan.lpan.imp.transform
+de.htw.ai.loz.gpan.lpan.msg
+de.htw.ai.loz.gpan.lpan.transform
+de.htw.ai.loz.gpan.lpan.web
+de.htw.ai.loz.gpan.mac.adaptation
+de.htw.ai.loz.gpan.mac.broker
+de.htw.ai.loz.gpan.mac.imp
+de.htw.ai.loz.gpan.mac.macCop.defs
+de.htw.ai.loz.gpan.mac.msg
+de.htw.ai.loz.gpan.mac.web
+de.htw.ai.loz.gpan.socket

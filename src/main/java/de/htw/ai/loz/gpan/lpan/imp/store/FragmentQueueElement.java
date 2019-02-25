@@ -1,5 +1,27 @@
+/*
+Copyright 2019 Miles Lorenz
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+*/
 package de.htw.ai.loz.gpan.lpan.imp.store;
 
+
+/**
+ * Element of a {@code FragmentQueue}
+ *
+ * @author Miles Lorenz
+ * @version 1.0
+ */
 public class FragmentQueueElement {
 
     private final byte[] fragment;
@@ -28,14 +50,10 @@ public class FragmentQueueElement {
         if (offsetStart == anElement.offsetStart && offsetEnd == anElement.offsetEnd) {
             // if they equal it's ignorable, but queueing stops here
             if (fragment.equals(anElement.fragment))
-            return;
+                return;
 
             throw new Exception("INVALID same fragment offset different payload");
         }
-
-        System.out.println("OVERLAP: " + anElement.offsetStart + " => " + anElement.offsetEnd +
-                " | " + offsetStart + " " + offsetEnd);
-        // the fragments would overlap ...
         if ((offsetStart <= anElement.offsetStart && offsetEnd >= anElement.offsetStart)
                 || (anElement.offsetStart <= offsetStart && anElement.offsetEnd >= offsetStart))
             throw new Exception("INVALID fragments overlap");
@@ -47,7 +65,7 @@ public class FragmentQueueElement {
             anElement.queue(previous, this, counter);
 
             // => if we are not the last pass it
-        } else if (next != null){
+        } else if (next != null) {
             next.tryQueue(anElement, counter);
 
             // => it is the new last and we are not

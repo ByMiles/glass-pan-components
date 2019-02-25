@@ -1,10 +1,37 @@
+/*
+Copyright 2019 Miles Lorenz
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+*/
 package de.htw.ai.loz.gpan.lpan.header;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import inet.ipaddr.AddressStringException;
 
 import java.io.IOException;
-
+/**
+ * Contains constants and static methods to process IPv6 packets in a 6lowPAN environment.
+ * ( @link https://tools.ietf.org/html/rfc6282 ).
+ * 
+ * <ul>
+ *     <li>handling iphc dispatches</li>
+ *     <li>handling extension header dispatches</li>
+ *     <li>handling udp dispatches</li>
+ * </ul>
+ *
+ * @author Miles Lorenz
+ * @version 1.0
+ */
 public class IphcHeader {
 
     public static final int HOP_LIMIT_CARRIED_IN_LINE = 0;
@@ -49,6 +76,19 @@ public class IphcHeader {
     public static final int UDP_COMPRESSION_MODE_ONLY_LENGTH = 0;
 
 
+    /**
+     * Generates an iphc dispatch from the given parameters and used constants.
+     * 
+     * @param isNextHeaderCompressed True if next header is compressed
+     * @param hopLimit On of the constants representing a valid hop limit compression.
+     * @param isContextIdentifierExtensionUsed True if context is used
+     * @param isSourceAddressCompressionStateful True if context is used for compressing the source address
+     * @param sourceAddressMode The mode used for compressing the source address
+     * @param isMulticast True if the destination address is a multicast address
+     * @param isDestAddressCompressionStateful True if context is used for compressing the destination address 
+     * @param destAddressMode The mode used for compressing the destination address
+     * @return The generated iphc dispatch
+     */
     public static byte[] generateCompressedHeader(
             boolean isNextHeaderCompressed,
             int hopLimit,
@@ -72,64 +112,100 @@ public class IphcHeader {
         };
     }
 
-    public static void bitByBit(byte[] bytes) {
-        for (byte b : bytes) {
-            for (int i = 7; i > -1; i--) {
-                System.out.print(((b >> i) & 1) + " | ");
-            }
-            System.out.println();
-        }
-        System.out.println(isNextHeaderCompressed(bytes, 0));
-        System.out.println(hopLimit(bytes, 0));
-        System.out.println(isContextIdentifierExtensionUsed(bytes, 0));
-        System.out.println(isSourceAddressCompressionStateful(bytes, 0));
-        System.out.println(sourceAddressMode(bytes, 0));
-        System.out.println(isMulticast(bytes, 0));
-        System.out.println(isDestAddressCompressionStateful(bytes, 0));
-        System.out.println(destAddressMode(bytes, 0));
+    /**
+     * Extracts the compression of the next header from the iphc dispatch.
+     * @param packet A compressed not fragmented data unit
+     * @param headerPosition The position of the iphc dispatch
+     * @return True if the next header is compressed
+     */
+    public static boolean isNextHeaderCompressed(byte[] packet, int headerPosition) {
+
+        return (packet[headerPosition] & 0b0000_0100) > 0;
     }
 
-    public static boolean isNextHeaderCompressed(byte[] payload, int headerPosition) {
+    /**
+     * Extracts the constant for the hop limit from the iphc dispatch.
+     * @param packet An compressed not fragmented packet.
+     * @param headerPosition The position of the iphc header.
+     * @return The constant representing the compressed hop limit
+     */
+    public static int hopLimit(byte[] packet, int headerPosition) {
 
-        return (payload[headerPosition] & 0b0000_0100) > 0;
+        return (packet[headerPosition] & 0b0000_0011);
     }
 
-    public static int hopLimit(byte[] payload, int headerPosition) {
+    /**
+     * Checks for usage of context for address compression.
+     * @param packet An compressed not fragmented packet.
+     * @param headerPosition The position of the iphc header.
+     * @return True if context is used for address compression.
+     */
+    public static boolean isContextIdentifierExtensionUsed(byte[] packet, int headerPosition) {
 
-        return (payload[headerPosition] & 0b0000_0011);
+        return (packet[headerPosition + 1] & 0b1000_0000) > 0;
     }
 
-    public static boolean isContextIdentifierExtensionUsed(byte[] payload, int headerPosition) {
+    /**
+     * Checks for usage of context for source address compression.
+     * @param packet An compressed not fragmented packet.
+     * @param headerPosition The position of the iphc header.
+     * @return True if context is used for source address compression.
+     */
+    public static boolean isSourceAddressCompressionStateful(byte[] packet, int headerPosition) {
 
-        return (payload[headerPosition + 1] & 0b1000_0000) > 0;
+        return (packet[headerPosition + 1] & 0b0100_0000) > 0;
     }
 
-    public static boolean isSourceAddressCompressionStateful(byte[] payload, int headerPosition) {
+    /**
+     * Extracts the used mode for source address compression from the iphc dispatch.
+     * @param packet An compressed not fragmented packet.
+     * @param headerPosition The position of the iphc dispatch.
+     * @return The mode used for source address compression
+     */
+    public static int sourceAddressMode(byte[] packet, int headerPosition) {
 
-        return (payload[headerPosition + 1] & 0b0100_0000) > 0;
+        return ((packet[headerPosition + 1] & 0b0011_0000) >> 4);
     }
 
-    public static int sourceAddressMode(byte[] payload, int headerPosition) {
+    /**
+     * Checks the iphc dispatch, if this the packet is a multicast.
+     * @param packet An compressed not fragmented packet.
+     * @param headerPosition The position of the iphc dispatch.
+     * @return True if the packet is a multicast.
+     */
+    public static boolean isMulticast(byte[] packet, int headerPosition) {
 
-        return ((payload[headerPosition + 1] & 0b0011_0000) >> 4);
+        return (packet[headerPosition + 1] & 0b0000_1000) > 0;
+    }
+    
+    /**
+     * Checks for usage of context for destination address compression.
+     * @param packet An compressed not fragmented packet.
+     * @param headerPosition The position of the iphc header.
+     * @return True if context is used for destination address compression.
+     */
+    public static boolean isDestAddressCompressionStateful(byte[] packet, int headerPosition) {
+
+        return (packet[headerPosition + 1] & 0b0000_0100) > 0;
     }
 
-    public static boolean isMulticast(byte[] payload, int headerPosition) {
+    /**
+     * Extracts the used mode for destination address compression from the iphc dispatch.
+     * @param packet An compressed not fragmented packet.
+     * @param headerPosition The position of the iphc dispatch.
+     * @return The mode used for destination address compression
+     */
+    public static int destAddressMode(byte[] packet, int headerPosition) {
 
-        return (payload[headerPosition + 1] & 0b0000_1000) > 0;
-    }
-
-    public static boolean isDestAddressCompressionStateful(byte[] payload, int headerPosition) {
-
-        return (payload[headerPosition + 1] & 0b0000_0100) > 0;
-    }
-
-    public static int destAddressMode(byte[] payload, int headerPosition) {
-
-        return (payload[headerPosition + 1] & 0b0000_0011);
+        return (packet[headerPosition + 1] & 0b0000_0011);
     }
 
 
+    /**
+     * Compares the given value to all specified (by RFC 6282) dispatches for extension headers.
+     * @param compressed The possibly compressed value of a next header parameter in an IPv6 or extension header.
+     * @return True if the compressed equals one of the specified (RFC 6282) dispatches for extension headers.
+     */
     public static boolean isCompressedExtensionHeader(int compressed) {
         return (
                 compressed == NEXT_HEADER_COMPRESSED_HOP_BY_HOP
@@ -139,10 +215,21 @@ public class IphcHeader {
         );
     }
 
+    /**
+     * Checks if the given value equals the udp dispatch (as only supported upper layer protocol).
+     * @param compressed The possibly compressed value of a next header parameter in an IPv6 or extension header.
+     * @return True if the upper layer is compressed
+     */
     public static boolean isCompressedUpperLayer(int compressed) {
         return ((compressed & 0b1111_0000) == NEXT_HEADER_COMPRESSED_UDP);
     }
 
+    /**
+     * Compares the given value to all possible dispatches (RFC 6282)
+     * and returns the uncompressed value or 255, if none was found.
+     * @param compressed The possibly compressed value of a next header parameter in an IPv6 or extension header.
+     * @return The uncompressed protocol number corresponding to the dispatch or 255.
+     */
     public static int deCompressExtensionProtocol(int compressed) {
         switch (compressed) {
             case NEXT_HEADER_COMPRESSED_HOP_BY_HOP:
@@ -158,6 +245,11 @@ public class IphcHeader {
         }
     }
 
+    /**
+     * Checks if the given value represents a compressible extension header
+     * @param unCompressed the uncompressed protocol number
+     * @return True if the protocol number is compressible.
+     */
     public static boolean isUnCompressedExtensionHeader(int unCompressed) {
         return (
                 unCompressed == NEXT_HEADER_HOP_BY_HOP

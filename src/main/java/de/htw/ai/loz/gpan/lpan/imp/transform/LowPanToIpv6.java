@@ -1,3 +1,18 @@
+/*
+Copyright 2019 Miles Lorenz
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+*/
 package de.htw.ai.loz.gpan.lpan.imp.transform;
 
 import de.htw.ai.loz.gpan.lpan.header.IpV6Header;
@@ -16,6 +31,11 @@ import java.util.List;
 
 import static de.htw.ai.loz.gpan.mac.macCop.defs.MacCoPStatic.toHex;
 
+/**
+ * Helper class for {@code FrameComposer}
+ * @author Miles Lorenz
+ * @version 1.0
+ */
 public class LowPanToIpv6 {
 
     private ComposedPacket outgoing;
@@ -29,7 +49,6 @@ public class LowPanToIpv6 {
 
 
     public ComposedPacket unFragmentedToComposed(DataFrame fragmentWrapper) throws Exception {
-        System.out.println("COMPOSE UNFRAGMENTED");
         outgoing = new ComposedPacket();
         outgoing.setLinkHeader(fragmentWrapper.getLinkHeader());
         compressedFrame = fragmentWrapper.getDataBytes();
@@ -37,7 +56,6 @@ public class LowPanToIpv6 {
     }
 
     public ComposedPacket fragmentedToComposed(FragmentedPacket incoming) throws Exception {
-        System.out.println("COMPOSE FRAGMENTED");
         outgoing = new ComposedPacket();
         outgoing.setDatagramTag(incoming.getDatagramTag());
         deFragmentFrames(incoming.getFragmentBytes());
@@ -78,7 +96,6 @@ public class LowPanToIpv6 {
         PacketElement upperLayer = new PacketElement();
         upperLayer.setProtocol(nextHeader);
         upperLayer.setPayloadBytes(Arrays.copyOfRange(compressedFrame, framePointer, compressedFrame.length));
-        System.out.println("OUTGOING: " + toHex(upperLayer.getPayload().getBytes()));
         outgoing.setPayload(upperLayer);
     }
 
@@ -298,10 +315,8 @@ public class LowPanToIpv6 {
     private void deFragmentFrames(byte[][] fragments) throws IOException {
         ByteArrayOutputStream unFragmentedBuilder = new ByteArrayOutputStream();
                 unFragmentedBuilder.write(Arrays.copyOfRange(fragments[0], 4, fragments[0].length));
-        System.out.println(" defragmenting: " + unFragmentedBuilder.toString());
         for (int i = 1; i < fragments.length; i++) {
             unFragmentedBuilder.write(Arrays.copyOfRange(fragments[i], 5, fragments[i].length));
-            System.out.println(" defragmenting: " + unFragmentedBuilder.toString());
         }
 
         compressedFrame = unFragmentedBuilder.toByteArray();

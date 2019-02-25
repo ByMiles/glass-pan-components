@@ -1,3 +1,18 @@
+/*
+Copyright 2019 Miles Lorenz
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+*/
 package de.htw.ai.loz.gpan.lpan.imp.transform;
 
 import java.util.LinkedList;
@@ -5,6 +20,11 @@ import java.util.List;
 
 import static de.htw.ai.loz.gpan.mac.macCop.defs.MacCoPStatic.toHex;
 
+/**
+ * Helper class for {@code FrameComposer}
+ * @author Miles Lorenz
+ * @version 1.0
+ */
 public class PacketFragmenter {
 
     private List<byte[]> fragments;
@@ -33,28 +53,23 @@ public class PacketFragmenter {
         int currentFrameSize;
         int remaining;
         int fragmentPointer;
-        System.out.println("while rein");
         while (offset < unfragmentedFrame.length) {
             fragmentPointer = 0;
             remaining = unfragmentedFrame.length - offset;
-            System.out.println(remaining + " " + offset + " " + unfragmentedFrame.length);
             currentFrameSize = availableFrameSize > remaining
                     ? remaining
                     : availableFrameSize;
 
-            System.out.println(remaining + " " + offset + " " + currentFrameSize);
-            byte[] fragment = new byte[currentFrameSize + currentHeader.length];
+             byte[] fragment = new byte[currentFrameSize + currentHeader.length];
             for (int i = 0; i < currentHeader.length; i++) {
                 fragment[fragmentPointer++] = currentHeader[i];
             }
             while (fragmentPointer < fragment.length) {
                 fragment[fragmentPointer++] = unfragmentedFrame[offset++];
-                System.out.println(fragmentPointer + " / " + fragment.length + " | " + offset + " / " + unfragmentedFrame.length);
             }
             fragments.add(fragment);
             currentHeader = new byte[]{leadingByteInFollowing, datagramSize, datagramTagHigh, datagramTagLow, (byte) (offset / 8)};
         }
-        System.out.println("while raus");
-        return fragments.toArray(new byte[0][]);
+       return fragments.toArray(new byte[0][]);
     }
 }
