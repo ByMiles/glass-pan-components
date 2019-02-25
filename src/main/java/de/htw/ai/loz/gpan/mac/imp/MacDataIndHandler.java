@@ -39,7 +39,7 @@ public class MacDataIndHandler implements IndicationHandler {
 
     public MacDataIndHandler() {
         subscribers = new ConcurrentLinkedQueue<>();
-        subscriberLock = new ReentrantReadWriteLock();
+        subscriberLock = new Object();
     }
 
     @Override
@@ -50,6 +50,7 @@ public class MacDataIndHandler implements IndicationHandler {
         logActivity();
         synchronized (subscriberLock) {
             subscriberLock.notify();
+            System.out.println("Notified!!!");
         }
         return ConfirmationResult.SUCCESS;
     }

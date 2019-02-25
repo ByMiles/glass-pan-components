@@ -32,6 +32,7 @@ public class MacDataCmdHandler implements CommandHandler {
     @Override
     public ConfirmationResult sendData(MacDataCmd cmd)  {
 
+        System.out.println("SEND DATA!");
         ConfirmationResult lastResult = dataHandler.sendData(cmd);
         if (lastResult != ConfirmationResult.SUCCESS)
             return lastResult;

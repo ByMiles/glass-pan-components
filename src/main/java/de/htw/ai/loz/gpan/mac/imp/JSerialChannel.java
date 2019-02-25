@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static de.htw.ai.loz.gpan.mac.macCop.defs.MacCoPStatic.toHex;
+
 public class JSerialChannel implements Channel {
 
     private SerialPort port;
@@ -86,7 +88,7 @@ public class JSerialChannel implements Channel {
             ChannelDataCmd cmd = inQueue.poll();
             if (cmd != null) {
                 port.getOutputStream().write(cmd.getDataBuffer());
-                // System.out.println(name + " OUT: " + toHex(cmd.getDataBuffer()));
+              //  System.out.println(name + " OUT: " + toHex(cmd.getDataBuffer()));
             }
         }
     }
@@ -101,7 +103,7 @@ public class JSerialChannel implements Channel {
             if (dataLength < dataAvailable) {
                 buffer = Arrays.copyOf(buffer, dataLength);
             }
-            // System.out.println(name + "  IN: " + toHex(buffer));
+         //   System.out.println(name + "  IN: " + toHex(buffer));
             outQueue.put(new ChannelDataInd(buffer));
         }
     }

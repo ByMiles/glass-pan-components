@@ -41,7 +41,7 @@ public class MacBroker implements de.htw.ai.loz.gpan.mac.broker.MacBroker {
 
     public MacBroker() {
         macMap = new ConcurrentHashMap<>();
-        SocketService.publisher().registerPublisher("imp", this);
+        SocketService.publisher().registerPublisher("mac", this);
     }
 
     @Override

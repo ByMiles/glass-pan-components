@@ -72,8 +72,9 @@ public class SocketService extends WebSocketServer implements EventBroker {
         }
 
         webSocket.send(result.name());
-        if (result != ConfirmationResult.SUCCESS)
+        if (result != ConfirmationResult.SUCCESS) {
             webSocket.close();
+        }
     }
 
     @Override

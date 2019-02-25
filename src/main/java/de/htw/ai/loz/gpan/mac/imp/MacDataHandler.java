@@ -151,6 +151,7 @@ public class MacDataHandler extends MacHandler implements DataHandler {
         MacDataRsp rsp = null;
         try {
             channelLock.lock();
+
             rsps.clear();
             allocateHandleId(cmd.getHandleId());
             fireDataMessage(cmd);
@@ -171,6 +172,7 @@ public class MacDataHandler extends MacHandler implements DataHandler {
     private void allocateHandleId(byte handleId) {
         confirmationLock.lock();
         cnfs.removeIf(macDataCnf -> macDataCnf.getHandleId() == handleId);
+        confirmationLock.unlock();
     }
 
     private void fireDataMessage(MacDataCmd cmd) {
@@ -185,7 +187,7 @@ public class MacDataHandler extends MacHandler implements DataHandler {
                                         cmd.getBody()
                                 )));
         try {
-            commandQueue.put(channelDataCmd);
+           commandQueue.put(channelDataCmd);
         } catch (InterruptedException ignored) {
         }
     }
@@ -205,7 +207,6 @@ public class MacDataHandler extends MacHandler implements DataHandler {
         return result;
     }
 
-
     @Override
     public MacDataInd awaitIndication() throws Exception {
         if (isClosed)
@@ -213,7 +214,7 @@ public class MacDataHandler extends MacHandler implements DataHandler {
 
         try {
             return inds.take();
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             System.out.println(name + " Interrupted on awaiting indication");
         }
         return awaitIndication();
